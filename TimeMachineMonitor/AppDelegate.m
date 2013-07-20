@@ -12,17 +12,12 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    // Insert code here to initialize your application
-//    NSStatusItem *statusItem;
-
     NSStatusBar *statusBar = [NSStatusBar systemStatusBar];
     self.statusItem = [statusBar statusItemWithLength:NSSquareStatusItemLength];
     
     if([self statusItem]) {
-//        NSLog(@"%@", [self statusItem]);
         NSImage *theIconImage = [NSImage imageNamed:@"Icon1.png"] ;
         [self.statusItem setImage: theIconImage];
-//        [[self statusItem] setTitle:@"My Item"];
         NSLog(@"%@", theIconImage);
         [self.statusItem setToolTip:@"My Tooltip!"];
         
@@ -38,9 +33,6 @@
         
         [self.statusItem setMenu:theMenu];
     }
- 
-    
-    
 }
 
 -(void) handleQuit:(id) sender {
@@ -48,3 +40,22 @@
 }
 
 @end
+
+/*
+ 
+ http://developer.apple.com/library/mac/#documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLoginItems.html
+ - (BOOL)isAppSetToRunAtLogon {
+ int ret = [UKLoginItemRegistry indexForLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
+ return (ret >= 0);
+ }
+ 
+ - (void) runAtLogon
+ {
+ [UKLoginItemRegistry addLoginItemWithPath:[[NSBundle mainBundle] bundlePath] hideIt: NO];
+ }
+ 
+ - (void) removeFromLogon
+ {
+ [UKLoginItemRegistry removeLoginItemWithPath:[[NSBundle mainBundle] bundlePath]];
+ }
+ */
