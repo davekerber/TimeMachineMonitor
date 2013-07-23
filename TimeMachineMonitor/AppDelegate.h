@@ -12,6 +12,7 @@
 
 @property (strong) NSStatusItem *statusItem;
 @property (strong) NSMenuItem *latestBackupMenuItem;
+@property (strong) NSTimer *checkTimer ;
 @property BOOL backupCurrent ;
 
 @end

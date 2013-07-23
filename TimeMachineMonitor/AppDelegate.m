@@ -14,12 +14,7 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     [self createStatusBarItem];
-    [self checkIfBackupCurrent];
-    [self updateDisplay];
-    [self scheduleNextCheck];
-    
-
-    
+    [self runUpdate];
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
                                                            selector: @selector(makeWake:)
                                                                name: NSWorkspaceDidWakeNotification
@@ -28,12 +23,19 @@
 
 - (void) makeWake:(id) sender {
     NSLog(@"It Woke Up!");
+    [self runUpdate];
+}
+
+-(void) runUpdate {
+    [self checkIfBackupCurrent];
+    [self updateDisplay];
+    [self scheduleNextCheck];
 }
 
 -(NSDateComponents *) backupGapTolerance {
     NSDateComponents *components = [[NSDateComponents alloc] init];
-    components.hour = 0 ;
-    components.minute = 2;
+    components.hour = 12 ;
+    components.minute = 0;
     
     return components;
 }
@@ -72,26 +74,24 @@
 }
 
 -(void) updateLatestBackupTimeInMenu {
-    NSString *label = [NSString stringWithFormat:@"Latest Backup %@", [self formatDate:[self latestBackupDate]]]
-    ;
+    NSString *label = [NSString stringWithFormat:@"Latest Backup %@", [self formatDate:[self latestBackupDate]]];
     
     [self.latestBackupMenuItem setTitle:label];
 }
 
 -(void) scheduleNextCheck {
+    [self.checkTimer invalidate];
     NSDate *dateForNextCheck = [self dateToCheckAgain];
     NSLog(@"Checking again at %@", dateForNextCheck);
-    NSTimer *timer = [[NSTimer alloc] initWithFireDate:dateForNextCheck interval:0 target:self selector: @selector(timerFired:) userInfo:nil repeats:NO];
+    self.checkTimer = [[NSTimer alloc] initWithFireDate:dateForNextCheck interval:0 target:self selector: @selector(timerFired:) userInfo:nil repeats:NO];
     
     NSRunLoop * theRunLoop = [NSRunLoop currentRunLoop];
-    [theRunLoop addTimer:timer forMode:NSDefaultRunLoopMode];
+    [theRunLoop addTimer:self.checkTimer forMode:NSDefaultRunLoopMode];
 }
 
 -(void) timerFired:(NSTimer*) timer {
     NSLog(@"Timer Fired at %@", [NSDate date]);
-    [self checkIfBackupCurrent];
-    [self updateDisplay];
-    [self scheduleNextCheck];
+    [self runUpdate];
 }
 
 -(void) updateIcons {
@@ -151,61 +151,19 @@
 }
 
 -(NSDate *) latestBackupDate {
-    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"MMM dd HH:mm:ss"];
-    [dateFormatter setTimeZone:[NSTimeZone localTimeZone]];
-    NSDate *lastBackupDate = [dateFormatter dateFromString:[self getLatestBackupTimeString]];
+    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:@"/Library/Preferences/com.apple.TimeMachine.plist"];
     
-    NSCalendar *gregorian = [self calendar];
-    NSDateComponents *calendarComponents =
-    [gregorian components:(NSDayCalendarUnit | NSMonthCalendarUnit | NSHourCalendarUnit | NSMinuteCalendarUnit) fromDate:lastBackupDate];
-    
-    
-    NSInteger currentMonth = [self getCurrentMonth];
-    NSInteger currentYear = [self getCurrentYear];
-    NSInteger lastBackupMonth = [calendarComponents month];
-    NSInteger lastBackupYear = currentYear ;
-    if(currentMonth < lastBackupMonth){
-        lastBackupYear = currentYear - 1 ;
-    }
-    [calendarComponents setYear:lastBackupYear];
-    NSDate *lastBackupDateWithYear = [[self calendar] dateFromComponents:calendarComponents];
-    
-    return lastBackupDateWithYear ;
-}
-
--(NSInteger) getCurrentMonth {
-    return [[self calendarComponents:NSMonthCalendarUnit fromDate:[NSDate date]] month];
-}
-
--(NSInteger) getCurrentYear {
-    return [[self calendarComponents:NSYearCalendarUnit fromDate:[NSDate date]] year];
-}
-
--(NSDateComponents *) calendarComponents:(NSUInteger)components fromDate:(NSDate*)date {
-    return [[self calendar] components:components fromDate:date];
+    NSArray *destinations = [dictionary objectForKey:@"Destinations"];
+    NSDictionary *firstDestination = [destinations objectAtIndex:0];
+    NSDate *dateString = [firstDestination objectForKey:@"BACKUP_COMPLETED_DATE"]; //is a __NSTaggedDate
+    NSDate *theDate = [[NSDate alloc] initWithTimeInterval:0 sinceDate:dateString];
+    return theDate;
 }
 
 -(NSCalendar *) calendar {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     [calendar setTimeZone:[NSTimeZone defaultTimeZone]];
     return calendar;
-}
-
--(NSString*) getLatestBackupTimeString {
-    NSTask *server = [NSTask new];
-    [server setLaunchPath:@"/bin/sh"];
-    [server setArguments:[NSArray arrayWithObjects:@"-c", @"grep 'com\\.apple\\.backupd.*Backup\\scompleted\\ssuccessfully' /var/log/system.log | tail -n 1 | cut -d ' ' -f1 -f2 -f3", nil]];
-    NSPipe *outputPipe = [NSPipe pipe];
-    [server setStandardInput:[NSPipe pipe]];
-    [server setStandardOutput:outputPipe];
-    [server launch];
-    [server waitUntilExit];
-
-    NSData *outputData = [[outputPipe fileHandleForReading] readDataToEndOfFile];
-    NSString *outputString = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
-
-    return [outputString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
 -(NSString *) formatDate:(NSDate*) date {
@@ -216,16 +174,6 @@
 }
 
 @end
-
-/** 
- This has the last backup time in it
-open  /Library/Preferences/com.apple.TimeMachine.plist
-*/
-
-/**
- Command to get the last successfuly backup time:
- grep 'com\.apple\.backupd.*Backup\scompleted\ssuccessfully' /var/log/system.log | tail -n 1 | cut -d ' ' -f1 -f2 -f3
-*/
 
 /*
  
