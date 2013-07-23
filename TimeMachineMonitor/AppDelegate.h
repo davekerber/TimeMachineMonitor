@@ -11,5 +11,7 @@
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
 @property (strong) NSStatusItem *statusItem;
+@property (strong) NSMenuItem *latestBackupMenuItem;
+@property BOOL backupCurrent ;
 
 @end
