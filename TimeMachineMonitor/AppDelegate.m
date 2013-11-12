@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "ServiceManagement/SMLoginItem.h"
 #import "NSDate+Compare.h"
 
 @implementation AppDelegate
@@ -15,13 +16,26 @@
 {
     [self createStatusBarItem];
     [self runUpdate];
+    [self listenForWakeUps];
+    
+    
+    CFStringRef bundleName = (CFStringRef) @"com.agapered.TimeMachineMonitor" ;
+    
+    bool changeTook = SMLoginItemSetEnabled(bundleName, YES);
+    
+    
+    
+    
+}
+
+-(void) listenForWakeUps {
     [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: self
-                                                           selector: @selector(makeWake:)
+                                                           selector: @selector(systemWokeUp:)
                                                                name: NSWorkspaceDidWakeNotification
                                                              object: nil];
 }
 
-- (void) makeWake:(id) sender {
+- (void) systemWokeUp:(id) sender {
     NSLog(@"It Woke Up!");
     [self runUpdate];
 }
@@ -54,6 +68,10 @@
     
     NSMenuItem *openTimeMachineItem = [theMenu addItemWithTitle:@"Open Time Machine" action:@selector(openTimeMachine:) keyEquivalent:@"t"];
     [openTimeMachineItem setKeyEquivalentModifierMask:NSCommandKeyMask];
+
+    NSMenuItem *startBackup = [theMenu addItemWithTitle:@"Start Backup" action:@selector(startBackup:) keyEquivalent:@"b"];
+    [openTimeMachineItem setKeyEquivalentModifierMask:NSCommandKeyMask];
+
     
     [theMenu addItem:[NSMenuItem separatorItem]];
     
@@ -66,6 +84,14 @@
 
 -(void) openTimeMachine: (id) sender {
     [[NSWorkspace sharedWorkspace] openFile:@"/System/Library/PreferencePanes/TimeMachine.prefPane"];
+}
+
+-(void) startBackup: (id) sender {
+    NSTask *server = [NSTask new];
+    [server setLaunchPath:@"/usr/bin/tmutil"];
+    [server setArguments:@[@"startbackup"]];
+    [server launch];
+    [server waitUntilExit];
 }
 
 -(void) updateDisplay {
@@ -151,11 +177,18 @@
 }
 
 -(NSDate *) latestBackupDate {
+    //TODO:  Check for no entries, or multiple entries
     NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:@"/Library/Preferences/com.apple.TimeMachine.plist"];
     
     NSArray *destinations = [dictionary objectForKey:@"Destinations"];
     NSDictionary *firstDestination = [destinations objectAtIndex:0];
-    NSDate *dateString = [firstDestination objectForKey:@"BACKUP_COMPLETED_DATE"]; //is a __NSTaggedDate
+    
+    NSArray *snapshots = [firstDestination objectForKey:@"SnapshotDates"];
+
+    NSDate *dateString = [snapshots lastObject];
+    
+    
+//    NSDate *dateString = [firstDestination objectForKey:@"BACKUP_COMPLETED_DATE"]; //is a __NSTaggedDate
     NSDate *theDate = [[NSDate alloc] initWithTimeInterval:0 sinceDate:dateString];
     return theDate;
 }

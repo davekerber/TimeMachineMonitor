@@ -22,6 +22,7 @@
 		3BF42DE7179C6547005D4FE3 /* plus1Template.png in Resources */ = {isa = PBXBuildFile; fileRef = 3BF42DE6179C6547005D4FE3 /* plus1Template.png */; };
 		3BF42DE9179C685C005D4FE3 /* cold_sweat2.png in Resources */ = {isa = PBXBuildFile; fileRef = 3BF42DE8179C685C005D4FE3 /* cold_sweat2.png */; };
 		3BF42DEC179C8243005D4FE3 /* NSDate+Compare.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BF42DEB179C8243005D4FE3 /* NSDate+Compare.m */; };
+		3BF42DEE179F4E4B005D4FE3 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BF42DED179F4E4B005D4FE3 /* ServiceManagement.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		3BF42DE8179C685C005D4FE3 /* cold_sweat2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cold_sweat2.png; sourceTree = "<group>"; };
 		3BF42DEA179C8243005D4FE3 /* NSDate+Compare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Compare.h"; sourceTree = "<group>"; };
 		3BF42DEB179C8243005D4FE3 /* NSDate+Compare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Compare.m"; sourceTree = "<group>"; };
+		3BF42DED179F4E4B005D4FE3 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3BF42DEE179F4E4B005D4FE3 /* ServiceManagement.framework in Frameworks */,
 				3B744D5C179B0A690074B4F8 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -106,6 +109,7 @@
 		3B744D5A179B0A690074B4F8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3BF42DED179F4E4B005D4FE3 /* ServiceManagement.framework */,
 				3B744D5B179B0A690074B4F8 /* Cocoa.framework */,
 				3B744D79179B0A6A0074B4F8 /* SenTestingKit.framework */,
 				3B744D5D179B0A690074B4F8 /* Other Frameworks */,
