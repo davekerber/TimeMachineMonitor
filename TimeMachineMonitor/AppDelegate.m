@@ -48,7 +48,8 @@
 
 -(NSDateComponents *) backupGapTolerance {
     NSDateComponents *components = [[NSDateComponents alloc] init];
-    components.hour = 12 ;
+    
+    components.hour = 36 ;
     components.minute = 0;
     
     return components;
